@@ -47,11 +47,8 @@ ENABLE_PTP_MASTER_MODE = n
 ENABLE_RSS_SUPPORT = n
 ENABLE_LIB_SUPPORT = n
 ENABLE_USE_FIRMWARE_FILE = n
-DISABLE_WOL_SUPPORT = n
+DISABLE_PM_SUPPORT = n
 DISABLE_MULTI_MSIX_VECTOR = n
-ENABLE_DOUBLE_VLAN = n
-ENABLE_PAGE_REUSE = n
-ENABLE_RX_PACKET_FRAGMENT = n
 
 ifneq ($(KERNELRELEASE),)
 	obj-m := r8125.o
@@ -116,20 +113,11 @@ ifneq ($(KERNELRELEASE),)
 		r8125-objs += r8125_firmware.o
 		EXTRA_CFLAGS += -DENABLE_USE_FIRMWARE_FILE
 	endif
-	ifeq ($(DISABLE_WOL_SUPPORT), y)
-		EXTRA_CFLAGS += -DDISABLE_WOL_SUPPORT
+	ifeq ($(DISABLE_PM_SUPPORT), y)
+		EXTRA_CFLAGS += -DDISABLE_PM_SUPPORT
 	endif
 	ifeq ($(DISABLE_MULTI_MSIX_VECTOR), y)
 		EXTRA_CFLAGS += -DDISABLE_MULTI_MSIX_VECTOR
-	endif
-	ifeq ($(ENABLE_DOUBLE_VLAN), y)
-		EXTRA_CFLAGS += -DENABLE_DOUBLE_VLAN
-	endif
-	ifeq ($(ENABLE_PAGE_REUSE), y)
-		EXTRA_CFLAGS += -DENABLE_PAGE_REUSE
-	endif
-	ifeq ($(ENABLE_RX_PACKET_FRAGMENT), y)
-		EXTRA_CFLAGS += -DENABLE_RX_PACKET_FRAGMENT
 	endif
 else
 	BASEDIR := /usr/local/x86_64-pc-linux-gnu/x86_64-pc-linux-gnu/sys-root/usr/lib/modules/DSM-7.2
@@ -142,68 +130,28 @@ else
 	ifeq ($(DRIVERDIR),)
 		DRIVERDIR := $(BASEDIR)/kernel/drivers/net
 	endif
-	RTKDIR := $(subst $(BASEDIR)/,,$(DRIVERDIR))
 
 	KERNEL_GCC_VERSION := $(shell cat /proc/version | sed -n 's/.*gcc version \([[:digit:]]\.[[:digit:]]\.[[:digit:]]\).*/\1/p')
 	CCVERSION = $(shell $(CC) -dumpversion)
 
-	KVER = $(shell uname -r)
-	KMAJ = $(shell echo $(KVER) | \
-	sed -e 's/^\([0-9][0-9]*\)\.[0-9][0-9]*\.[0-9][0-9]*.*/\1/')
-	KMIN = $(shell echo $(KVER) | \
-	sed -e 's/^[0-9][0-9]*\.\([0-9][0-9]*\)\.[0-9][0-9]*.*/\1/')
-	KREV = $(shell echo $(KVER) | \
-	sed -e 's/^[0-9][0-9]*\.[0-9][0-9]*\.\([0-9][0-9]*\).*/\1/')
-
-	kver_ge = $(shell \
-	echo test | awk '{if($(KMAJ) < $(1)) {print 0} else { \
-	if($(KMAJ) > $(1)) {print 1} else { \
-	if($(KMIN) < $(2)) {print 0} else { \
-	if($(KMIN) > $(2)) {print 1} else { \
-	if($(KREV) < $(3)) {print 0} else { print 1 } \
-	}}}}}' \
-	)
-
 .PHONY: all
-all: print_vars clean modules install
+all: print_vars clean modules
 
 print_vars:
 	@echo
 	@echo "CC: " $(CC)
 	@echo "CCVERSION: " $(CCVERSION)
-	@echo "KERNEL_GCC_VERSION: " $(KERNEL_GCC_VERSION)
-	@echo "KVER: " $(KVER)
-	@echo "KMAJ: " $(KMAJ)
-	@echo "KMIN: " $(KMIN)
-	@echo "KREV: " $(KREV)
 	@echo "BASEDIR: " $(BASEDIR)
 	@echo "DRIVERDIR: " $(DRIVERDIR)
 	@echo "PWD: " $(PWD)
-	@echo "RTKDIR: " $(RTKDIR)
 	@echo
 
 .PHONY:modules
 modules:
-#ifeq ($(call kver_ge,5,0,0),1)
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules
-#else
-#	$(MAKE) -C $(KERNELDIR) SUBDIRS=$(PWD) modules
-#endif
 
 .PHONY:clean
 clean:
-#ifeq ($(call kver_ge,5,0,0),1)
 	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
-#else
-#	$(MAKE) -C $(KERNELDIR) SUBDIRS=$(PWD) clean
-#endif
-
-.PHONY:install
-install:
-#ifeq ($(call kver_ge,5,0,0),1)
-	$(MAKE) -C $(KERNELDIR) M=$(PWD) INSTALL_MOD_DIR=$(RTKDIR) modules_install
-#else
-#	$(MAKE) -C $(KERNELDIR) SUBDIRS=$(PWD) INSTALL_MOD_DIR=$(RTKDIR) modules_install
-#endif
 
 endif
