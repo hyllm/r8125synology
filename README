@@ -1,1 +1,42 @@
 Driver version: 9.012.04
+
+
+
+Prepare kernel module:
+
+apt-get install git python3 python3-pip
+git config --global http.sslverify "false"
+mkdir -p /toolkit
+cd /toolkit
+git clone https://github.com/SynologyOpenSource/pkgscripts-ng
+cd /toolkit/pkgscripts-ng
+git checkout DSM7.2
+./EnvDeploy -v 7.2 -p v1000                             # replace "v1000" with your platform
+chroot /toolkit/build_env/ds.v1000-7.2                  # replace "v1000" with your platform
+mkdir -p /usr/src
+cd /usr/src
+git clone https://github.com/hyllm/r8125synology
+cd r8125synology/src
+make
+
+
+
+Install in Synology:
+
+1. Copy r8215.ko to a location available from your Synology device, like a shared folder or using SCP. 
+2. Connect using SSH and run the following commands:
+	sudo -i
+	cp r8215.ko /lib/modules
+	insmod /lib/modules/r8125.ko
+
+3. Confirm the module is loaded:
+	lspci -v | grep r8125
+	
+	Kernel driver in use: r8125
+
+4. Set up new interface:
+	ip link set up eth4                                   # replace "eth4" with your interface
+
+At this point, you should be able to see interface details using ifconfig eth4.
+
+5. Setup triggered task to run script "insmod /lib/modules/r8125.ko" on boot-up as root to load module at bootup.
