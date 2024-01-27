@@ -147,7 +147,7 @@ else
 	CCVERSION = $(shell $(CC) -dumpversion)
 
 .PHONY: all
-all: print_vars clean modules install
+all: print_vars clean modules
 
 print_vars:
 	@echo
