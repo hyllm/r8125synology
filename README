@@ -31,17 +31,9 @@ Install in Synology:
 1. Copy r8125.ko to a location available from your Synology device, like a shared folder or using SCP. 
 2. Connect using SSH and run the following commands:
 	sudo -i
-	cp r8125.ko /lib/modules
-	insmod /lib/modules/r8125.ko
-
-3. Confirm the module is loaded:
+	cp /path/to/r8125.ko /lib/modules
+3. Reboot
+4. Confirm the module is loaded:
 	lspci -v | grep r8125
 	
 	Kernel driver in use: r8125
-
-4. Set up new interface:
-	ip link set up eth4                                   # replace "eth4" with your interface
-
-At this point, you should be able to see interface details using ifconfig eth4.
-
-5. Setup triggered task to run script "insmod /lib/modules/r8125.ko" on boot-up as root to load module at bootup.
