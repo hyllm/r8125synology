@@ -28,7 +28,7 @@ make
 
 Install in Synology:
 
-1. Copy r8215.ko to a location available from your Synology device, like a shared folder or using SCP. 
+1. Copy r8125.ko to a location available from your Synology device, like a shared folder or using SCP. 
 2. Connect using SSH and run the following commands:
 	sudo -i
 	cp r8125.ko /lib/modules
